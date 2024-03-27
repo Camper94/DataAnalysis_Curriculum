@@ -140,3 +140,116 @@ LEFT JOIN movies AS m
 ON m.movie_id = r.movie_id
 WHERE date_renting >= '2019-01-01'
 GROUP BY country;
+/*Often rented movies
+Your manager wants you to make a list of movies excluding those which are hardly ever watched. 
+This list of movies will be used for advertising. 
+List all movies with more than 5 views using a nested query which is a powerful tool to implement 
+selection conditions.*/
+SELECT *
+FROM movies
+WHERE movie_id IN  
+	(SELECT movie_id
+	FROM renting
+	GROUP BY movie_id
+	HAVING COUNT(*) > 5)
+/*Frequent customers
+Report a list of customers who frequently rent movies on MovieNow.*/
+SELECT *
+FROM customers
+WHERE customer_id IN           
+	(SELECT DISTINCT customer_id
+	FROM renting
+	GROUP BY customer_id
+	HAVING COUNT(*) > 10);
+/*Movies with rating above average
+For the advertising campaign your manager also needs a list of popular movies with high ratings. 
+Report a list of movies with rating above average.*/
+SELECT title -- Report the movie titles of all movies with average rating higher than the total average
+FROM movies
+WHERE movie_id IN
+	(SELECT movie_id
+	 FROM renting
+     GROUP BY movie_id
+     HAVING AVG(rating) > 
+		(SELECT AVG(rating)
+		 FROM renting));
+/*Analyzing customer behavior
+A new advertising campaign is going to focus on customers who rented fewer than 5 movies.
+Use a correlated query to extract all customer information for the customers of interest.*/
+SELECT *
+FROM customers as c
+WHERE 5 > 
+	(SELECT count(*)
+	FROM renting as r
+	WHERE r.customer_id = c.customer_id);
+/*Customers who gave low ratings
+Identify customers who were not satisfied with movies they watched on MovieNow. 
+Report a list of customers with minimum rating smaller than 4.*/
+SELECT *
+FROM customers c
+WHERE  4 > -- Select all customers with a minimum rating smaller than 4 
+	(SELECT MIN(rating)
+	FROM renting AS r
+	WHERE r.customer_id = c.customer_id);
+/*Movies and ratings with correlated queries
+Report a list of movies that received the most attention on the movie platform,
+(i.e. report all movies with more than 5 ratings and all movies with an average rating higher than 8).*/
+SELECT *
+FROM movies AS m
+WHERE 8 < -- Select all movies with an average rating higher than 8
+	(SELECT AVG(rating)
+	FROM renting AS r
+	WHERE r.movie_id = m.movie_id);
+/*Customers with at least one rating
+Having active customers is a key performance indicator for MovieNow. 
+Make a list of customers who gave at least one rating.*/
+SELECT *
+FROM customers c
+WHERE EXISTS
+	(SELECT *
+	FROM renting AS r
+	WHERE rating IS NOT NULL 
+	AND r.customer_id = c.customer_id);
+/*Actors in comedies
+In order to analyze the diversity of actors in comedies, 
+first, report a list of actors who play in comedies and then, 
+the number of actors for each nationality playing in comedies.*/
+SELECT a.nationality,
+	   COUNT(*) -- Report the nationality and the number of actors for each nationality
+FROM actors AS a
+WHERE EXISTS
+	(SELECT ai.actor_id
+	 FROM actsin AS ai
+	 LEFT JOIN movies AS m
+	 ON m.movie_id = ai.movie_id
+	 WHERE m.genre = 'Comedy'
+	 AND ai.actor_id = a.actor_id)
+GROUP BY a.nationality;
+/*Young actors not coming from the USA
+As you've just seen, the operators UNION and INTERSECT are powerful tools when you work with two or more tables. 
+Identify actors who are not from the USA and actors who were born after 1990.*/
+SELECT name, 
+       nationality, 
+       year_of_birth
+FROM actors
+WHERE nationality <> 'USA'
+INTERSECT 
+SELECT name, 
+       nationality, 
+       year_of_birth
+FROM actors
+WHERE year_of_birth > 1990;
+/*Dramas with high ratings
+The advertising team has a new focus. They want to draw the attention of the customers to dramas. 
+Make a list of all movies that are in the drama genre and have an average rating higher than 9.*/
+SELECT *
+FROM movies
+WHERE movie_id = 
+   (SELECT movie_id
+    FROM movies
+    WHERE genre = 'Drama'
+    INTERSECT
+    SELECT movie_id
+    FROM renting
+    GROUP BY movie_id
+    HAVING AVG(rating)>9);
