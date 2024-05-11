@@ -41,7 +41,7 @@ Now consider the following visualization:
 		|
 		|
 	  	|            x
-Events	|   x      x    
+Events		|   x      x    
 		| x   x  x
 		|       x          x
 	 	 ---------------------
