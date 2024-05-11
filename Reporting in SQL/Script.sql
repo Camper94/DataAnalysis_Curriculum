@@ -41,11 +41,11 @@ Now consider the following visualization:
 		|
 		|
 	  	|            x
-Events		|   x      x    
+     Events	|   x      x    
 		| x   x  x
 		|       x          x
 	 	 ---------------------
-				Athletes
+			Athletes
 Using the summer_games table. run a query that creates the base report that sources
 this visualization.
 
@@ -219,11 +219,11 @@ Most Decorated Summer Athletes:
 			
 				|
 				|	|
-Gold Medals		|	|	|	|	|
+              Gold Medals	|	|	|	|
 				|	|	|	|	|
-			 ---------------------
+			        -----------------------------------
 				A	B	C	D	E
-				  Athlete Name
+				           Athlete Name
 Your job is to create the base report for this element. Base report details:
     -Column 1 should be athlete_name.
     -Column 2 should be gold_medals.
