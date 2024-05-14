@@ -41,11 +41,11 @@ Now consider the following visualization:
 		|
 		|
 	  	|            x
-Events	|   x      x    
+     Events	|   x      x    
 		| x   x  x
 		|       x          x
 	 	 ---------------------
-				Athletes
+			Athletes
 Using the summer_games table. run a query that creates the base report that sources
 this visualization.
 
@@ -219,11 +219,11 @@ Most Decorated Summer Athletes:
 			
 				|
 				|	|
-Gold Medals		|	|	|	|	|
+              Gold Medals	|	|	|	|
 				|	|	|	|	|
-			 ---------------------
+			        -----------------------------------
 				A	B	C	D	E
-				  Athlete Name
+				           Athlete Name
 Your job is to create the base report for this element. Base report details:
     -Column 1 should be athlete_name.
     -Column 2 should be gold_medals.
@@ -906,6 +906,7 @@ SELECT
 FROM summer_games_messy
 -- Update the group by accordingly
 GROUP BY event_fixed;
+<<<<<<< HEAD
 /*
 Filtering out nulls
 
@@ -1204,3 +1205,5 @@ GROUP BY c.country, pop_in_millions
 -- Keep only the top 25 medals_per_million rows
 ORDER BY medals_per_million DESC
 LIMIT 25;
+=======
+>>>>>>> 18901666c8a50d35b59397f3724d64472309e4f6
