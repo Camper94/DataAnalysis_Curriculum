@@ -906,3 +906,301 @@ SELECT
 FROM summer_games_messy
 -- Update the group by accordingly
 GROUP BY event_fixed;
+/*
+Filtering out nulls
+
+One way to deal with nulls is to simply filter them out. 
+There are two important conditionals related to nulls:
+    IS NULL is true for any value that is null.
+    IS NOT NULL is true for any value that is not null. 
+Note that a zero or a blank cell is not the same as a null.
+These conditionals can be leveraged by several clauses, 
+such as CASE statements, WHERE statements, and HAVING statements. 
+In this exercise, you will learn how to filter out nulls using two separate 
+techniques.
+Feel free to reference the E:R Diagram.
+
+Instructions :
+    -Setup a query that pulls country and total golds as gold_medals for all winter games.
+    -Group by the non-aggregated field and order by gold_medals in descending order.
+*/
+-- Show total gold_medals by country
+SELECT 
+	country,
+    SUM(gold) AS gold_medals
+FROM winter_games AS w
+JOIN countries AS c
+ON w.country_id = c.id
+GROUP BY country
+-- Order by gold_medals in descending order
+ORDER BY gold_medals DESC;
+/*
+	-Setup a query that pulls country and total golds as gold_medals for all winter games.
+    -Group by the non-aggregated field and order by gold_medals in descending order.
+*/
+-- Show total gold_medals by country
+SELECT 
+	country, 
+    SUM(gold) AS gold_medals
+FROM winter_games AS w
+JOIN countries AS c
+ON w.country_id = c.id
+-- Removes any row with no gold medals
+WHERE gold IS NOT NULL
+GROUP BY country
+-- Order by gold_medals in descending order
+ORDER BY gold_medals DESC;
+/*
+We can do a similar filter using HAVING. 
+Comment out the WHERE statement and add a HAVING statement that filters out 
+countries with no gold medals.
+*/
+-- Show total gold_medals by country
+SELECT 
+	country, 
+    SUM(gold) AS gold_medals
+FROM winter_games AS w
+JOIN countries AS c
+ON w.country_id = c.id
+-- Comment out the WHERE statement
+--WHERE gold IS NOT NULL
+GROUP BY country
+-- Replace WHERE statement with equivalent HAVING statement
+HAVING SUM(gold) IS NOT NULL 
+-- Order by gold_medals in descending order
+ORDER BY gold_medals DESC;
+/*
+Fixing calculations with coalesce
+
+Null values impact aggregations in a number of ways. 
+One issue is related to the AVG() function. By default, 
+the AVG() function does not take into account any null values. 
+However, there may be times when you want to include these null values 
+in the calculation as zeros.
+To replace null values with a string or a number, use the COALESCE() function. 
+Syntax is COALESCE(fieldName,replacement), where replacement is what should replace 
+all null instances of fieldName.
+This exercise will walk you through why null values can 
+throw off calculations and how to troubleshoot these issues.
+
+Instruction
+Build a report that shows total_events and gold_medals by athlete_id for all 
+summer events, ordered by total_events descending then athlete_id ascending.
+*/
+-- Pull events and golds by athlete_id for summer events
+SELECT 
+    athlete_id,
+    COUNT(event) AS total_events, 
+    SUM(gold) AS gold_medals
+FROM summer_games
+GROUP BY athlete_id
+-- Order by total_events descending and athlete_id ascending
+ORDER BY total_events DESC;
+--Create a field called avg_golds that averages the gold field.
+-- Pull events and golds by athlete_id for summer events
+SELECT 
+    athlete_id, 
+    -- Add a field that averages the existing gold field
+    AVG(gold) AS avg_golds,
+    COUNT(event) AS total_events, 
+    SUM(gold) AS gold_medals
+FROM summer_games
+GROUP BY athlete_id
+-- Order by total_events descending and athlete_id ascending
+ORDER BY total_events DESC, athlete_id;
+/*
+Question
+
+If the report was accurate, what should the first three values of avg_golds be?
+Possible answers
+[8, 8, 1]
+[0, 0, .125](X)
+[0, 0, 1]
+[0, 0, 8]
+*/
+--Fix the avg_golds field by replacing null values with zero.
+-- Pull events and golds by athlete_id for summer events
+SELECT 
+    athlete_id, 
+    -- Replace all null gold values with 0
+    AVG(COALESCE(gold,0)) AS avg_golds,
+    COUNT(event) AS total_events, 
+    SUM(gold) AS gold_medals
+FROM summer_games
+GROUP BY athlete_id
+-- Order by total_events descending and athlete_id ascending
+ORDER BY total_events DESC, athlete_id;
+/*
+Identifying duplication
+Duplication can happen for a number of reasons, 
+often in unexpected ways. Because of this, 
+it's important to get in the habit of validating your queries to ensure 
+no duplication exists. To validate a query, take the following steps:
+
+    Check the total value of a metric from the original table.
+    Compare that with the total value of the same metric in your final report.
+
+If the number from step 2 is larger than step 1, 
+then duplication is likely the culprit. In this exercise, 
+you will go through these steps to identify if duplication exists.
+*/
+--Setup a query that pulls total gold_medals from the winter_games table.
+SELECT SUM(gold) AS gold_medals
+FROM winter_games;
+/*
+    Comment out the top query after noting the gold_medals value.
+    Build a query that shows gold_medals and avg_gdp by country_id, 
+	but joins winter_games and country_stats only on the country_id fields.
+*/
+-- Comment out the query after noting the gold medal count
+--SELECT SUM(gold) AS gold_medals
+---FROM winter_games;
+-- TOTAL GOLD MEDALS: ____  
+
+-- Show gold_medals and avg_gdp by country_id
+SELECT 
+	w.country_id, 
+    SUM(w.gold) AS gold_medals, 
+    AVG(c.gdp) AS avg_gdp
+FROM winter_games AS w
+JOIN country_stats AS c
+-- Only join on the country_id fields
+ON w.country_id = c.country_id
+GROUP BY w.country_id;
+/*
+Wrap your newest query in a subquery, 
+alias as subquery, and calculate the total value for the gold_medals field.
+*/
+SELECT SUM(gold_medals)
+FROM
+	(SELECT 
+        w.country_id, 
+     	   SUM(gold) AS gold_medals, 
+        AVG(gdp) AS avg_gdp
+    FROM winter_games AS w
+    JOIN country_stats AS c
+    ON c.country_id = w.country_id
+    -- Alias your query as subquery
+    GROUP BY w.country_id) AS subquery;
+-- Notice how gold_medals is much higher in the query? 
+--We'll look at ways to solve this in the next exercise.
+/*
+Fixing duplication through a JOIN
+
+In the previous exercise, you set up a query that contained duplication. 
+This exercise will remove the duplication. One approach to removing duplication 
+is to change the JOIN logic by adding another field to the ON statement.
+The final query from last exercise is shown in the console. 
+Your job is to fix the duplication by updating the ON statement. 
+Note that the total gold_medals value should be 47.
+Feel free to reference the E:R Diagram.
+
+Instructions
+	-Update the ON statement in the subquery by adding a second field to JOIN on.
+    -If an error occurs related to the new JOIN field, use a CAST() statement to fix it.
+*/
+SELECT SUM(gold_medals) AS gold_medals
+FROM
+	(SELECT 
+     	w.country_id, 
+     	SUM(gold) AS gold_medals, 
+     	AVG(gdp) AS avg_gdp
+    FROM winter_games AS w
+    JOIN country_stats AS c
+    -- Update the subquery to join on a second field
+    ON c.country_id = w.country_id AND c.year::date = w.year
+    GROUP BY w.country_id) AS subquery;
+/*
+Report 3: Countries with high medal rates
+
+Great work so far! It is time to use the concepts you learned in this chapter 
+to build the next base report for your dashboard.
+Details for report 3: medals vs population rate.
+    Column 1 should be country_code, which is an altered version of the country field.
+    Column 2 should be pop_in_millions, representing the population of the country (in millions).
+    Column 3 should be medals, representing the total number of medals.
+    Column 4 should be medals_per_million, which equals medals / pop_in_millions
+
+Instruction :
+Pull total medals by country for all summer games, 
+where the medals field uses one SUM function and several 
+null-handling functions on the gold, silver, and bronze fields.
+*/
+SELECT 
+	c.country,
+    -- Add the three medal fields using one sum function
+	SUM(COALESCE(s.gold,0)+COALESCE(s.silver,0)+COALESCE(s.bronze,0)) AS medals
+FROM summer_games AS s
+JOIN countries AS c
+ON s.country_id = c.id
+GROUP BY c.country
+ORDER BY medals DESC;
+/*
+Join to country_stats to pull in pop_in_millions, 
+then create medals_per_million by dividing total medals by 
+pop_in_millions and converting data types as needed.
+*/
+SELECT 
+	c.country,
+    -- Pull in pop_in_millions and medals_per_million 
+    pop_in_millions,
+    -- Add the three medal fields using one sum function
+	SUM(COALESCE(bronze,0) + COALESCE(silver,0) + COALESCE(gold,0)) AS medals,
+SUM(COALESCE(bronze,0) + COALESCE(silver,0) + COALESCE(gold,0))/pop_in_millions::NUMERIC AS medals_per_million
+FROM summer_games AS s
+JOIN countries AS c
+ON s.country_id = c.id
+-- Add a join
+JOIN country_stats AS cs
+ON c.id = cs.country_id
+GROUP BY c.country, pop_in_millions
+ORDER BY medals DESC;
+/*
+Notice the repeated values in the results. 
+Add a column on the newest join statement to remove this duplication, 
+and if you run into an error when trying to join, 
+update the query so both fields are stored as type date.
+*/
+SELECT 
+	c.country,
+    -- Pull in pop_in_millions and medals_per_million 
+	pop_in_millions,
+    -- Add the three medal fields using one sum function
+	SUM(COALESCE(bronze,0) + COALESCE(silver,0) + COALESCE(gold,0)) AS medals,
+	SUM(COALESCE(bronze,0) + COALESCE(silver,0) + COALESCE(gold,0)) / CAST(cs.pop_in_millions AS float) AS medals_per_million
+FROM summer_games AS s
+JOIN countries AS c 
+ON s.country_id = c.id
+-- Update the newest join statement to remove duplication
+JOIN country_stats AS cs 
+ON s.country_id = cs.country_id
+AND s.year = cs.year::date
+GROUP BY c.country, pop_in_millions
+ORDER BY medals DESC;
+/*
+Update country to country_code by trimming leading spaces, 
+converting to upper case, removing . 
+characters, and keeping only the left 3 characters, 
+then filter out null populations and keep only the 25 rows with the 
+most medals_per_million.
+*/
+SELECT 
+	-- Clean the country field to only show country_code
+    UPPER(LEFT(TRIM(REPLACE(c.country,'.','')),3)) AS country_code,
+    -- Pull in pop_in_millions and medals_per_million 
+	pop_in_millions,
+    -- Add the three medal fields using one sum function
+	SUM(COALESCE(bronze,0) + COALESCE(silver,0) + COALESCE(gold,0)) AS medals,
+	SUM(COALESCE(bronze,0) + COALESCE(silver,0) + COALESCE(gold,0)) / CAST(cs.pop_in_millions AS float) AS medals_per_million
+FROM summer_games AS s
+JOIN countries AS c 
+ON s.country_id = c.id
+-- Update the newest join statement to remove duplication
+JOIN country_stats AS cs 
+ON s.country_id = cs.country_id AND s.year = CAST(cs.year AS date)
+-- Filter out null populations
+WHERE pop_in_millions IS NOT NULL
+GROUP BY c.country, pop_in_millions
+-- Keep only the top 25 medals_per_million rows
+ORDER BY medals_per_million DESC
+LIMIT 25;
