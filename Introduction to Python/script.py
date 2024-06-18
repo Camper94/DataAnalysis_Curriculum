@@ -1,3 +1,8 @@
+#Script_Name : script.py
+#Description : Introduction to python
+#Author : Sofiane Boumelit
+#Date : June 18, 2024 
+
 #Type conversion
 '''
 Using the + operator to paste together two strings can be very 
