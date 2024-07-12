@@ -264,4 +264,162 @@ print(sales["date"].max())
 # Print the minimum of the date column
 print(sales["date"].min())
 
+#efficient summaries
+'''
+While pandas and NumPy have tons of functions, sometimes, 
+you may need a different function to summarize your data.
+
+The .agg() method allows you to apply your own custom functions to a DataFrame, 
+as well as apply functions to more than one column of a DataFrame at once, 
+making your aggregations super-efficient. For example,
+
+df['column'].agg(function)
+In the custom function for this exercise, "IQR" is short for inter-quartile range, 
+which is the 75th percentile minus the 25th percentile. 
+It's an alternative to standard deviation that is helpful if your data contains outliers.
+
+sales is available and pandas is loaded as pd.
+'''
+# Import NumPy and create custom IQR function
+import numpy as np
+def iqr(column):
+    return column.quantile(0.75) - column.quantile(0.25)
+
+# Update to print IQR and median of temperature_c, fuel_price_usd_per_l, & unemployment
+print(sales[["temperature_c", "fuel_price_usd_per_l", "unemployment"]].agg([iqr, np.median]))
+
+#cumulative statistics
+'''
+Cumulative statistics can also be helpful in tracking summary statistics over time.
+In this exercise, you'll calculate the cumulative sum and cumulative max of a department's weekly sales, 
+which will allow you to identify what the total sales were so far as well as what the highest weekly 
+sales were so far.
+
+A DataFrame called sales_1_1 has been created for you, 
+which contains the sales data for department 1 of store 1. pandas is loaded as pd.
+'''
+
+# Sort sales_1_1 by date
+sales_1_1 = sales_1_1.sort_values("date",ascending = True)
+
+# Get the cumulative sum of weekly_sales, add as cum_weekly_sales col
+sales_1_1["cum_weekly_sales"] = sales_1_1["weekly_sales"].cumsum()
+
+# Get the cumulative max of weekly_sales, add as cum_max_sales col
+sales_1_1["cum_max_sales"] = sales_1_1["weekly_sales"].cummax()
+
+# See the columns you calculated
+print(sales_1_1[["date", "weekly_sales", "cum_weekly_sales", "cum_max_sales"]])
+
+#dropping duplicates
+'''
+Removing duplicates is an essential skill to get accurate counts because often, 
+you don't want to count the same thing multiple times. 
+In this exercise, you'll create some new DataFrames using unique values from sales.
+
+sales is available and pandas is imported as pd.
+'''
+# Drop duplicate store/type combinations
+store_types = sales.drop_duplicates(subset=["store","type"])
+print(store_types.head())
+# Drop duplicate store/department combinations
+store_depts = sales.drop_duplicates(subset=["store","department"])
+print(store_depts.head())
+# Subset the rows where is_holiday is True and drop duplicate dates
+holiday_dates = sales[sales["is_holiday"]].drop_duplicates("date")
+# Print date col of holiday_dates
+print(holiday_dates)
+
+#counting categorical variables
+'''
+Counting is a great way to get an overview of your data and to spot curiosities that 
+you might not notice otherwise. 
+In this exercise, you'll count the number of each type of store and the number of each 
+department number using the DataFrames you created in the previous exercise:
+
+# Drop duplicate store/type combinations
+store_types = sales.drop_duplicates(subset=["store", "type"])
+
+# Drop duplicate store/department combinations
+store_depts = sales.drop_duplicates(subset=["store", "department"])
+The store_types and store_depts DataFrames you created in the last exercise are available, 
+and pandas is imported as pd.
+'''
+# Count the number of stores of each type
+store_counts = store_types["type"].value_counts()
+print(store_counts)
+# Get the proportion of stores of each type
+store_props = store_types["type"].value_counts(normalize=True)
+print(store_props)
+# Count the number of each department number and sort
+dept_counts_sorted = store_depts["department"].value_counts(sort=True)
+print(dept_counts_sorted)
+# Get the proportion of departments of each number and sort
+dept_props_sorted = store_depts["department"].value_counts(sort=True, normalize=True)
+print(dept_props_sorted)
+
+#what percent of sales occured at each store type ?
+'''
+While .groupby() is useful, you can calculate grouped summary statistics without it.
+Walmart distinguishes three types of stores: "supercenters," "discount stores," and "neighborhood markets," 
+encoded in this dataset as type "A," "B," and "C." In this exercise, you'll calculate 
+the total sales made at each store type, without using .groupby(). 
+You can then use these numbers to see what proportion of Walmart's total sales were made at each type.
+sales is available and pandas is imported as pd.
+'''
+# Calc total weekly sales
+sales_all = sales["weekly_sales"].sum()
+# Subset for type A stores, calc total weekly sales
+sales_A = sales[sales["type"] == "A"]["weekly_sales"].sum()
+# Subset for type B stores, calc total weekly sales
+sales_B = sales[sales["type"] == "B"]["weekly_sales"].sum()
+# Subset for type C stores, calc total weekly sales
+sales_C = sales[sales["type"] == "C"]["weekly_sales"].sum()
+# Get proportion for each type
+sales_propn_by_type = [sales_A, sales_B, sales_C] / sales_all
+print(sales_propn_by_type)
+
+
+#Calculations with .groupby()
+'''
+The .groupby() method makes life much easier. 
+In this exercise, you'll perform the same calculations as last time, 
+except you'll use the .groupby() method. 
+You'll also perform calculations on data grouped by two variables to see if sales differ 
+by store type depending on if it's a holiday week or not.
+
+sales is available and pandas is loaded as pd.
+'''
+
+# Group by type; calc total weekly sales
+sales_by_type = sales.groupby("type")["weekly_sales"].sum()
+# Get proportion for each type
+sales_propn_by_type = sales_by_type / sum(sales_by_type)
+print(sales_propn_by_type)
+
+# From previous step
+sales_by_type = sales.groupby("type")["weekly_sales"].sum()
+# Group by type and is_holiday; calc total weekly sales
+sales_by_type_is_holiday = sales.groupby(["type","is_holiday"])["weekly_sales"].sum()
+print(sales_by_type_is_holiday)
+
+#Multiple grouped summaries
+'''
+Earlier in this chapter, 
+you saw that the .agg() method is useful to compute multiple statistics on multiple variables. 
+It also works with grouped data. NumPy, which is imported as np, 
+has many different summary statistics functions, including: np.min, np.max, np.mean, and np.median.
+sales is available and pandas is imported as pd.
+'''
+
+# Import numpy with the alias np
+import numpy as np
+# For each store type, aggregate weekly_sales: get min, max, mean, and median
+sales_stats = sales.groupby("type")["weekly_sales"].agg([min,max,np.mean,np.median])
+# Print sales_stats
+print(sales_stats)
+# For each store type, aggregate unemployment and fuel_price_usd_per_l: get min, max, mean, and median
+unemp_fuel_stats = sales.groupby("type")[["unemployment","fuel_price_usd_per_l"]].agg([min,max,np.mean,np.median])
+# Print unemp_fuel_stats
+print(unemp_fuel_stats)
 
