@@ -423,3 +423,192 @@ unemp_fuel_stats = sales.groupby("type")[["unemployment","fuel_price_usd_per_l"]
 # Print unemp_fuel_stats
 print(unemp_fuel_stats)
 
+#Pivoting on one variable
+'''
+Pivot tables are the standard way of aggregating data in spreadsheets.
+In pandas, pivot tables are essentially another 
+way of performing grouped calculations. That is, the .
+pivot_table() method is an alternative to .groupby().
+In this exercise, you'll perform calculations using .
+pivot_table() to replicate the calculations you performed in the last 
+lesson using .groupby().
+sales is available and pandas is imported as pd.
+'''
+# Pivot for mean weekly_sales for each store type
+mean_sales_by_type = sales.pivot_table(values="weekly_sales",index="type")
+# Print mean_sales_by_type
+print(mean_sales_by_type)
+# Import NumPy as np
+import numpy as np
+# Pivot for mean and median weekly_sales for each store type
+mean_med_sales_by_type = sales.pivot_table(values="weekly_sales",index="type",aggfunc=[np.mean,np.median])
+# Print mean_med_sales_by_type
+print(mean_med_sales_by_type)
+# Pivot for mean weekly_sales by store type and holiday 
+mean_sales_by_type_holiday = sales.pivot_table(values="weekly_sales",index="type",columns = "is_holiday")
+# Print mean_sales_by_type_holiday
+print(mean_sales_by_type_holiday)
+
+#fill in missing values and sum values with pivot tables
+'''
+The .pivot_table() method has several useful arguments, 
+including fill_value and margins.
+fill_value replaces missing values with a real value (known as imputation). 
+What to replace missing values with is a topic big enough to have its own 
+course (Dealing with Missing Data in Python), 
+but the simplest thing to do is to substitute a dummy value.
+margins is a shortcut for when you pivoted by two variables, 
+but also wanted to pivot by each of those variables separately: 
+it gives the row and column totals of the pivot table contents.
+In this exercise, you'll practice using these arguments to up your 
+pivot table skills, which will help you crunch numbers more efficiently!
+sales is available and pandas is imported as pd.
+'''
+# Print mean weekly_sales by department and type; fill missing values with 0
+print(sales.pivot_table(values="weekly_sales",index="type",columns="department", fill_value = 0))
+# Print the mean weekly_sales by department and type; fill missing values with 0s; sum all rows and cols
+print(sales.pivot_table(values="weekly_sales", index="department", columns="type", fill_value = 0, margins = True))
+
+#setting and removing indexes
+'''
+pandas allows you to designate columns as an index. 
+This enables cleaner code when taking subsets 
+(as well as providing more efficient lookup under some circumstances).
+
+In this chapter, you'll be exploring temperatures, 
+a DataFrame of average temperatures in cities around the world. 
+pandas is loaded as pd.
+'''
+
+# Look at temperatures
+print(temperatures)
+# Set the index of temperatures to city
+temperatures_ind = temperatures.set_index("city")
+# Look at temperatures_ind
+print(temperatures_ind)
+# Reset the temperatures_ind index, keeping its contents
+print(temperatures_ind.reset_index())
+# Reset the temperatures_ind index, dropping its contents
+print(temperatures_ind.reset_index(drop=True))
+
+#Subsetting with .loc[]
+'''
+The killer feature for indexes is .loc[]: 
+a subsetting method that accepts index values. 
+When you pass it a single argument, it will take a subset of rows.
+The code for subsetting using .loc[] can be easier to read than 
+standard square bracket subsetting, 
+which can make your code less burdensome to maintain.
+pandas is loaded as pd. temperatures and temperatures_ind are available; 
+the latter is indexed by city.
+'''
+
+# Make a list of cities to subset on
+cities = ["Moscow", "Saint Petersburg"]
+# Subset temperatures using square brackets
+print(temperatures[temperatures["city"].isin(cities)])
+# Subset temperatures_ind using .loc[]
+print(temperatures_ind.loc[cities])
+
+#Setting multi-level indexes
+'''
+Indexes can also be made out of multiple columns, 
+forming a multi-level index (sometimes called a hierarchical index). 
+There is a trade-off to using these.
+The benefit is that multi-level indexes make it more natural to 
+reason about nested categorical variables. 
+For example, in a clinical trial, 
+you might have control and treatment groups. 
+Then each test subject belongs to one or another group, 
+and we can say that a test subject is nested inside the treatment group. 
+Similarly, in the temperature dataset, the city is located in the country, 
+so we can say a city is nested inside the country.
+
+The main downside is that the code for manipulating indexes 
+is different from the code for manipulating columns, 
+so you have to learn two syntaxes and keep track of how your data is 
+represented.
+
+pandas is loaded as pd. temperatures is available.
+'''
+# Index temperatures by country & city
+temperatures_ind = temperatures.set_index(["country","city"])
+# List of tuples: Brazil, Rio De Janeiro & Pakistan, Lahore
+rows_to_keep = [["Brazil","Rio De Janeiro"],["Pakistan","Lahore"]]
+# Subset for rows to keep
+print(temperatures_ind.loc[rows_to_keep])
+
+#Sorting by index values
+'''
+Previously, you changed the order of the rows in a DataFrame by calling 
+.sort_values(). 
+It's also useful to be able to sort by elements in the index. 
+For this, you need to use .sort_index().
+pandas is loaded as pd. 
+temperatures_ind has a multi-level index of country and city, 
+and is available.
+'''
+# Sort temperatures_ind by index values
+print(temperatures_ind.sort_index())
+# Sort temperatures_ind by index values at the city level
+print(temperatures_ind.sort_index(level="city"))
+# Sort temperatures_ind by country then descending city
+print(temperatures_ind.sort_index(level=["country","city"], ascending = [True,False]))
+
+#Slicing index values
+'''
+Slicing lets you select consecutive elements of an object using 
+first:last syntax. DataFrames can be sliced by index values or 
+by row/column number; we'll start with the first case. 
+This involves slicing inside the .loc[] method.
+
+Compared to slicing lists, there are a few things to remember.
+
+You can only slice an index if the index is sorted (using .sort_index()).
+To slice at the outer level, first and last can be strings.
+To slice at inner levels, first and last should be tuples.
+If you pass a single slice to .loc[], it will slice the rows.
+pandas is loaded as pd. temperatures_ind has country and city in the index, 
+and is available.
+'''
+# Sort the index of temperatures_ind
+temperatures_srt = temperatures_ind.sort_index()
+# Subset rows from Pakistan to Russia
+print(temperatures_srt.loc["Pakistan":"Russia"])
+# Try to subset rows from Lahore to Moscow
+print(temperatures_srt.loc["Lahore":"Moscow"])
+# Subset rows from Pakistan, Lahore to Russia, Moscow
+print(temperatures_srt.loc[("Pakistan","Lahore"):("Russia","Moscow")])
+
+#Slicing in both directions
+'''
+You've seen slicing DataFrames by rows and by columns, 
+but since DataFrames are two-dimensional objects, 
+it is often natural to slice both dimensions at once. 
+That is, by passing two arguments to .loc[], 
+you can subset by rows and columns in one go.
+pandas is loaded as pd. temperatures_srt is indexed by country and city,
+has a sorted index, and is available
+'''
+# Subset rows from India, Hyderabad to Iraq, Baghdad
+print(temperatures_srt.loc[("India","Hyderabad"):("Iraq","Baghdad")])
+# Subset columns from date to avg_temp_c
+print(temperatures_srt.loc[:,"date":"avg_temp_c"])
+# Subset in both directions at once
+print(temperatures_srt.loc[("India","Hyderabad"):("Iraq","Baghdad"),"date":"avg_temp_c"])
+
+#Slicing times series
+'''
+Slicing is particularly useful for time series since 
+it's a common thing to want to filter for data within a date range. 
+Add the date column to the index, then use .loc[] to perform the subsetting. 
+The important thing to remember is to keep your dates in ISO 8601 format, 
+that is, "yyyy-mm-dd" for year-month-day, "yyyy-mm" for year-month, 
+and "yyyy" for year.
+
+Recall from Chapter 1 that you can combine multiple Boolean conditions 
+using logical operators, such as &. To do so in one line of code, 
+you'll need to add parentheses () around each condition.
+
+pandas is loaded as pd and temperatures, with no index, is available.
+'''
