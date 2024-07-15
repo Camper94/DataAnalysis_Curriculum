@@ -612,3 +612,158 @@ you'll need to add parentheses () around each condition.
 
 pandas is loaded as pd and temperatures, with no index, is available.
 '''
+# Use Boolean conditions to subset temperatures for rows in 2010 and 2011
+temperatures_bool = temperatures[(temperatures["date"] >= "2010-01-01") & (temperatures["date"]<= "2011-12-31")]
+print(temperatures_bool)
+# Set date as the index and sort the index
+temperatures_ind = temperatures.set_index("date").sort_index()
+# Use .loc[] to subset temperatures_ind for rows in 2010 and 2011
+print(temperatures_ind.loc["2010":"2011"])
+# Use .loc[] to subset temperatures_ind for rows from Aug 2010 to Feb 2011
+print(temperatures_ind.loc["08-2010":"02-2011"])
+
+#Subsetting by row/column number
+'''
+The most common ways to subset rows are the ways we've previously discussed: 
+using a Boolean condition or by index labels. However, 
+it is also occasionally useful to pass row numbers.
+This is done using .iloc[], and like .loc[], 
+it can take two arguments to let you subset by rows and columns.
+pandas is loaded as pd. temperatures (without an index) is available.
+'''
+# Get 23rd row, 2nd column (index 22, 1)
+print(temperatures.iloc[22:23,1:2])
+# Use slicing to get the first 5 rows
+print(temperatures.iloc[0:5,:])
+# Use slicing to get columns 3 to 4
+print(temperatures.iloc[:,2:4])
+# Use slicing in both directions at once
+print(temperatures.iloc[0:5,2:4])
+
+#Pivot temperature by city and year
+'''
+It's interesting to see how temperatures for each city change over 
+time—looking at every month results in a big table, which can be tricky to reason about. 
+Instead, let's look at how temperatures change by year.
+You can access the components of a date (year, month and day) using code of the form 
+dataframe["column"].dt.component. For example, the month component is dataframe["column"].dt.month,
+and the year component is dataframe["column"].dt.year.
+
+Once you have the year column, you can create a pivot table with the data aggregated by city and year, 
+which you'll explore in the coming exercises.
+
+pandas is loaded as pd. temperatures is available.
+'''
+# Add a year column to temperatures
+temperatures["year"] = temperatures["date"].dt.year
+# Pivot avg_temp_c by country and city vs year
+temp_by_country_city_vs_year = temperatures.pivot_table("avg_temp_c",index=["country","city"], columns=["year"])
+# See the result
+print(temp_by_country_city_vs_year)
+
+#Subsetting pivot tables
+'''
+A pivot table is just a DataFrame with sorted indexes, 
+so the techniques you have learned already can be used to subset them. 
+In particular, the .loc[] + slicing combination is often helpful.
+pandas is loaded as pd. temp_by_country_city_vs_year is available.
+'''
+print(temp_by_country_city_vs_year)
+# Subset for Egypt to India
+print(temp_by_country_city_vs_year.loc["Egypt":"India"])
+# Subset for Egypt, Cairo to India, Delhi
+print(temp_by_country_city_vs_year.loc[("Egypt","Cairo"):("India","Delhi")])
+# Subset for Egypt, Cairo to India, Delhi, and 2005 to 2010
+print(temp_by_country_city_vs_year.loc[("Egypt","Cairo"):("India","Delhi"),"2005":"2010"])
+
+#Calculating on a pivot table
+'''
+Pivot tables are filled with summary statistics, 
+but they are only a first step to finding something insightful. 
+Often you'll need to perform further calculations on them. 
+A common thing to do is to find the rows or columns where the highest or lowest value occurs.
+Recall from Chapter 1 that you can easily subset a Series or DataFrame to find rows of interest 
+using a logical condition inside of square brackets. For example: series[series > value].
+pandas is loaded as pd and the DataFrame temp_by_country_city_vs_year is available.
+'''
+
+print(temp_by_country_city_vs_year)
+# Get the worldwide mean temp by year
+mean_temp_by_year = temp_by_country_city_vs_year.mean(axis="index")
+# Filter for the year that had the highest mean temp
+print(mean_temp_by_year[mean_temp_by_year == mean_temp_by_year.max()])
+# Get the mean temp by city
+mean_temp_by_city = temp_by_country_city_vs_year.mean(axis="columns")
+# Filter for the city that had the lowest mean temp
+print(mean_temp_by_city[mean_temp_by_city == mean_temp_by_city.min()])
+
+#Which avocado size is most popular?
+'''
+Avocados are increasingly popular and delicious in guacamole and on toast. 
+The Hass Avocado Board keeps track of avocado supply and demand across the USA, 
+including the sales of three different sizes of avocado. 
+In this exercise, you'll use a bar plot to figure out which size is the most popular.
+Bar plots are great for revealing relationships between categorical (size) and numeric (number sold) variables,
+but you'll often have to manipulate your data first in order to get the numbers you need for plotting.
+pandas has been imported as pd, and avocados is available.
+'''
+
+# Import matplotlib.pyplot with alias plt
+import matplotlib.pyplot as plt
+# Look at the first few rows of data
+print(avocados.head())
+# Get the total number of avocados sold of each size
+nb_sold_by_size = avocados.groupby("size")["nb_sold"].sum()
+# Create a bar plot of the number of avocados sold by size
+nb_sold_by_size.plot(kind="bar")
+# Show the plot
+plt.show()
+
+#Changes in sales over time
+'''
+Line plots are designed to visualize the relationship between two numeric variables, 
+where each data values is connected to the next one. 
+They are especially useful for visualizing the change in a number over 
+time since each time point is naturally connected to the next time point. 
+In this exercise, you'll visualize the change in avocado sales over three years.
+pandas has been imported as pd, and avocados is available.
+'''
+
+# Import matplotlib.pyplot with alias plt
+import matplotlib.pyplot as plt
+print(avocados)
+# Get the total number of avocados sold on each date
+nb_sold_by_date = avocados.groupby('date')["nb_sold"].sum()
+print(nb_sold_by_date.head())
+# Create a line plot of the number of avocados sold by date
+nb_sold_by_date.plot(x="type",y="date",kind="line")
+# Show the plot
+plt.show()
+
+#Avocado supply and demand
+'''
+Scatter plots are ideal for visualizing relationships between numerical variables. 
+In this exercise, you'll compare the number of avocados sold to average price and see if they're at all related.
+If they're related, you may be able to use one number to predict the other.
+matplotlib.pyplot has been imported as plt, pandas has been imported as pd, and avocados is available.
+'''
+
+# Scatter plot of avg_price vs. nb_sold with title
+avocados.plot(x='nb_sold',y='avg_price',kind='scatter',title='Number of avocados sold vs. average price')
+# Show the plot
+plt.show()
+
+#Price of conventional vs. organic avocados 
+'''
+Creating multiple plots for different subsets of data allows you to compare groups. 
+In this exercise, you'll create multiple histograms to compare the prices of conventional and organic avocados.
+matplotlib.pyplot has been imported as plt and pandas has been imported as pd.
+'''
+# Modify bins to 20
+avocados[avocados["type"] == "conventional"]["avg_price"].hist(bins= 20,alpha=0.5)
+# Modify bins to 20
+avocados[avocados["type"] == "organic"]["avg_price"].hist(bins=20,alpha=0.5)
+# Add a legend
+plt.legend(["conventional", "organic"])
+# Show the plot
+plt.show()
