@@ -830,3 +830,79 @@ avocados_filled = avocados_2016.fillna(0)
 avocados_filled[cols_with_missing].hist()
 # Show the plot
 plt.show()
+
+#List of dictionaries
+'''
+You recently got some new avocado data from 2019 that you'd like to 
+put in a DataFrame using the list of dictionaries method. 
+Remember that with this method, you go through the data row by row.
+
+date	small_sold	large_sold
+"2019-11-03"	10376832	7835071
+"2019-11-10"	10717154	8561348
+pandas as pd is imported.
+'''
+
+# Create a list of dictionaries with new data
+avocados_list = [
+    {"date": "2019-11-03", "small_sold": 10376832, "large_sold": 7835071},
+    {"date": "2019-11-10", "small_sold": 10717154, "large_sold": 8561348},
+]
+# Convert list into DataFrame
+avocados_2019 = pd.DataFrame(avocados_list)
+# Print the new DataFrame
+print(avocados_2019)
+
+#Dictionary of lists
+'''
+Some more data just came in! This time, you'll use the dictionary of lists method, parsing the data column by column.
+date	small_sold	large_sold
+"2019-11-17"	10859987	7674135
+"2019-12-01"	9291631	6238096
+pandas as pd is imported.
+'''
+
+# Create a dictionary of lists with new data
+avocados_dict = {
+  "date": ["2019-11-17","2019-12-01"],
+  "small_sold": [10859987,9291631],
+  "large_sold": [7674135,6238096]
+}
+# Convert dictionary into DataFrame
+avocados_2019 = pd.DataFrame(avocados_dict)
+# Print the new DataFrame
+print(avocados_2019)
+
+#CSV to DataFrame
+'''
+You work for an airline, 
+and your manager has asked you to do a competitive analysis and see how often 
+passengers flying on other airlines are involuntarily bumped from their flights. 
+You got a CSV file (airline_bumping.csv) from the Department of Transportation 
+containing data on passengers that were involuntarily denied boarding in 2016 and 2017, 
+but it doesn't have the exact numbers you want. In order to figure this out, 
+you'll need to get the CSV into a pandas DataFrame and do some manipulation!
+pandas is imported for you as pd. "airline_bumping.csv" is in your working directory.
+'''
+
+# From previous steps
+airline_bumping = pd.read_csv("airline_bumping.csv")
+print(airline_bumping.head())
+airline_totals = airline_bumping.groupby("airline")[["nb_bumped", "total_passengers"]].sum()
+airline_totals["bumps_per_10k"] = airline_totals["nb_bumped"] / airline_totals["total_passengers"] * 10000
+# Print airline_totals
+print(airline_totals)
+
+#DataFrame to CSV
+'''
+You're almost there! To make things easier to read, 
+you'll need to sort the data and export it to CSV so that your colleagues can read it.
+pandas as pd has been imported for you.
+'''
+
+# Create airline_totals_sorted
+airline_totals_sorted = airline_totals.sort_values("bumps_per_10k",ascending= False)
+# Print airline_totals_sorted
+print(airline_totals_sorted)
+# Save as airline_totals_sorted.csv
+airline_totals_sorted.to_csv("airline_totals_sorted.csv")
