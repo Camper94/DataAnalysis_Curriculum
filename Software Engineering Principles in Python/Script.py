@@ -326,3 +326,102 @@ setup(name='text_analyzer',
       author='Sofiane Boumelit',
       packages=['text_analyzer'],
       install_requires=['matplotlib>=3.0.0'])
+
+#Writing a class for your package
+'''
+We've covered how classes can be written in Python. 
+In this exercise, you'll be creating the beginnings of a Document class that will be a 
+foundation for text analysis in your package. 
+Once the class is written you will modify your package's __init__.py file to make it easily accessible by your users.
+
+Below is the structure of where you'll be working.
+
+working_dir
+├── text_analyzer
+│    ├── __init__.py
+│    ├── counter_utils.py
+│    ├── document.py
+└── my_script.py
+'''
+# Define Document class
+class Document:
+    """A class for text analysis    
+    :param text: string of text to be analyzed
+    :ivar text: string of text to be analyzed; set by `text` parameter
+    """
+    # Method to create a new instance of MyClass
+    def __init__(self, text):
+        # Store text parameter to the text attribute
+        self.text = text
+
+#Using your package's class
+'''
+You just wrote the beginnings of a Document class that you'll build upon to perform text analysis. 
+In this exercise, you'll test out its current functionality of storing text.
+Below is the document tree that you've built up so far when developing your package. 
+You'll be working in my_script.py.
+
+working_dir
+├── text_analyzer
+│    ├── __init__.py
+│    ├── counter_utils.py
+│    ├── document.py
+└── my_script.py
+'''
+
+# Import custom text_analyzer package
+import text_analyzer
+# Create an instance of Document with datacamp_tweet
+my_document = text_analyzer.Document(text=datacamp_tweet)
+# Print the text attribute of the Document instance
+print(my_document.text)
+
+#Writing a non-public method
+'''
+In the lesson, we covered how to add functionality to classes using non-public methods. 
+By defining methods as non-public you're signifying to the user that the method is only to be used inside the package.
+In this exercise, you will define a non-public method that will be leveraged by your class to count words.
+'''
+class Document:
+  def __init__(self, text):
+    self.text = text
+    # pre tokenize the document with non-public tokenize method
+    self.tokens = self._tokenize()
+    # pre tokenize the document with non-public count_words
+    self.word_counts = self._count_words()
+  def _tokenize(self):
+    return tokenize(self.text)
+  # non-public method to tally document's word counts with Counter
+  def _count_words(self):
+    return Counter(self.tokens)
+
+
+#Using your class's functionality
+'''
+You've now added additional functionality to your Document class's __init__ method that automatically 
+processes text for your users. 
+In this exercise, you'll act as one of those users to see the benefits of your hard work.
+The Document class (copied below) has been loaded into your environment (complete with your new updates).
+
+class Document:
+  def __init__(self, text):
+    self.text = text
+    # pre tokenize the document with non-public tokenize method
+    self.tokens = self._tokenize()
+    # pre tokenize the document with non-public count_words
+    self.word_counts = self._count_words()
+
+  def _tokenize(self):
+    return tokenize(self.text)
+
+  # non-public method to tally document's word counts with Counter
+  def _count_words(self):
+    return Counter(self.tokens)
+'''
+
+# create a new document instance from datacamp_tweets
+datacamp_doc = Document(text=datacamp_tweets)
+# print the first 5 tokens from datacamp_doc
+print(datacamp_doc.tokens[:5])
+# print the top 5 most used words in datacamp_doc
+print(datacamp_doc.word_counts.most_common(5))
