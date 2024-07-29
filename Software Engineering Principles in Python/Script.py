@@ -425,3 +425,85 @@ datacamp_doc = Document(text=datacamp_tweets)
 print(datacamp_doc.tokens[:5])
 # print the top 5 most used words in datacamp_doc
 print(datacamp_doc.word_counts.most_common(5))
+
+#Using inheritance to create a class
+'''
+You've previously written a Document class for text analysis, but your NLP project will now have a 
+focus on Social Media data. Your general Document class might be useful later so 
+it's best not destroy it while your focus shifts to tweets.
+Instead of copy-pasting the already written functionality, 
+you will use the principles of 'DRY' and inheritance to quickly create your new SocialMedia class.
+'''
+# Define a SocialMedia class that is a child of the `Document class`
+class SocialMedia(Document):
+    def __init__(self, text):
+        Document.__init__(self, text)
+
+#Adding functionality to a child class
+'''
+You've just written a SocialMedia class that inherits functionality from Document. 
+As of now, the SocialMedia class doesn't have any functionality different from Document. 
+In this exercise, you will build features into SocialMedia to specialize it for use with Social Media data.
+For reference, the definition of Document can be seen below.
+
+class Document:
+    # Initialize a new Document instance
+    def __init__(self, text):
+        self.text = text
+        # Pre tokenize the document with non-public tokenize method
+        self.tokens = self._tokenize()
+        # Pre tokenize the document with non-public count_words
+        self.word_counts = self._count_words()
+
+    def _tokenize(self):
+        return tokenize(self.text)
+
+    # Non-public method to tally document's word counts
+    def _count_words(self):
+        # Use collections.Counter to count the document's tokens
+        return Counter(self.tokens)
+'''
+# Define a SocialMedia class that is a child of the `Document class`
+class SocialMedia(Document):
+    def __init__(self, text):
+        Document.__init__(self,text)
+        self.hashtag_counts = self._count_hashtags()
+        self.mention_counts = self._count_mentions()
+    def _count_hashtags(self):
+        # Filter attribute so only words starting with '#' remain
+        return filter_word_counts(self.word_counts, first_char='#')          
+    def _count_mentions(self):
+        # Filter attribute so only words starting with '@' remain
+        return filter_word_counts(self.word_counts, first_char='@')
+
+#Using your child class
+'''
+Thanks to the power of inheritance you were able to create a feature-rich, 
+SocialMedia class based on its parent, Document. Let's see some of these features in action.
+
+Below is the full definition of SocialMedia for reference. 
+Additionally, SocialMedia has been added to __init__.py for ease of use.
+
+class SocialMedia(Document):
+    def __init__(self, text):
+        Document.__init__(self, text)
+        self.hashtag_counts = self._count_hashtags()
+        self.mention_counts = self._count_mentions()
+
+    def _count_hashtags(self):
+        # Filter attribute so only words starting with '#' remain
+        return filter_word_counts(self.word_counts, first_char='#')      
+
+    def _count_mentions(self):
+        # Filter attribute so only words starting with '@' remain
+        return filter_word_counts(self.word_counts, first_char='@')
+'''
+
+# Import custom text_analyzer package
+import text_analyzer
+# Create a SocialMedia instance with datacamp_tweets
+dc_tweets = text_analyzer.SocialMedia(text=datacamp_tweets)
+# Print the top five most most mentioned users
+print(dc_tweets._count_mentions().most_common(5))
+# Plot the most used hashtags
+text_analyzer.plot_counter(dc_tweets._count_hashtags())
