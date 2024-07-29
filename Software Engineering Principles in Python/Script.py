@@ -507,3 +507,26 @@ dc_tweets = text_analyzer.SocialMedia(text=datacamp_tweets)
 print(dc_tweets._count_mentions().most_common(5))
 # Plot the most used hashtags
 text_analyzer.plot_counter(dc_tweets._count_hashtags())
+
+#Exploring with dir and  help
+'''
+A new method has been added to the Document class. 
+The method is a convenience wrapper around the plot_counter() function you wrote in an earlier exercise. 
+In this exercise, you'll use dir() and help() to identify how to utilize the new method.
+'''
+
+# Import needed package
+import text_analyzer
+# Create instance of document
+my_doc = text_analyzer.Document(datacamp_tweets)
+# Run help on my_doc's plot method
+help(my_doc.plot_counts)
+# Plot the word_counts of my_doc
+my_doc.plot_counts(attribute='word_counts',n_most_common = 5)
+
+#Creating a grandchild class
+'''
+In this exercise you will be using inheritance to create a Tweet class from your SocialMedia class. 
+This new grandchild class of Document will be able to tackle Twitter specific details such as retweets.
+'''
+
