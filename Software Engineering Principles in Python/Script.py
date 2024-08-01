@@ -530,3 +530,129 @@ In this exercise you will be using inheritance to create a Tweet class from your
 This new grandchild class of Document will be able to tackle Twitter specific details such as retweets.
 '''
 
+# Define a Tweet class that inherits from SocialMedia
+class Tweets(SocialMedia):
+    def __init__(self, text):
+        # Call parent's __init__ with super()
+        super().__init__(self,text)
+        # Define retweets attribute with non-public method
+        self.retweets = self._process_retweets()
+    def _process_retweets(self):
+        # Filter tweet text to only include retweets
+        retweet_text = filter_lines(self.text, 'RT')
+        # Return retweet_text as a SocialMedia object
+        return SocialMedia(retweet_text)
+
+
+#Using inherited methods
+'''
+You've now defined a Tweets class that's inherited methods from both Document and SocialMedia. 
+In this exercise, you'll use inherited methods to visualize text from both tweets and retweets.
+Be aware that this is real data from Twitter and as such there is always a risk that it may contain profanity or 
+other offensive content (in this exercise, and any following exercises that also use real Twitter data).
+'''
+
+# Import needed package
+import text_analyzer
+# Create instance of Tweets
+my_tweets = text_analyzer.Tweets(datacamp_tweets)
+# Plot the most used hashtags in the tweets
+my_tweets.plot_counts('hashtag_counts',n_most_common=5)
+# Plot the most used hashtags in the retweets
+my_tweets.retweets.plot_counts('hashtag_counts',n_most_common=5)
+
+#Identifying good comments
+'''
+We learned about what characteristics make a 'good' comment. 
+In this exercise, you'll apply this knowledge to identify a function that utilizes comment best practices.
+'''
+import re
+def extract_0(text):
+    # match and extract dollar amounts from the text
+    return re.findall(r'\$\d+\.\d\d', text)
+def extract_1(text):
+    # return all matches to regex pattern
+    return re.findall(r'\$\d+\.\d\d', text)
+# Print the text
+print(text)
+# Print the results of the function with better commenting
+print(extract_0(text))
+
+#identifying proper decstrings
+'''
+We covered how to write fully-fledged docstrings. 
+Before writing one of your own, this exercise will help you practice by having you identify a properly formatted docstring.
+
+In this exercise, you'll be using the functions goldilocks(), rapunzel(), mary(), 
+and sleeping_beauty() which have been loaded in your environment.
+'''
+
+# Run the help on all 4 functions
+help(goldilocks)
+help(rapunzel)
+help(mary)
+help(sleeping_beauty)
+# Execute the function with most complete docstring
+result = rapunzel()
+# Print the result
+print(result)
+
+#Writing docstrings
+'''
+We just learned some about the benefits of docstrings. In this exercise, 
+you will practice writing docstrings that can be utilized by a documentation generator like Sphinx.
+Note that your docstring submission must match the solution exactly. 
+If you find yourself getting it wrong several times, it may be a good idea to refresh the sample code and start over.
+'''
+
+# Complete the function's docstring
+def tokenize(text, regex=r'[a-zA-z]+'):
+  """Split text into tokens using a regular expression
+
+  :param text: text to be tokenized
+  :param regex: regular expression used to match tokens using re.findall 
+  :return: a list of resulting tokens
+
+  >>> tokenize('the rain in spain')
+  ['the', 'rain', 'in', 'spain']
+  """
+  return re.findall(regex, text, flags=re.IGNORECASE)
+# Print the docstring
+help(tokenize)
+
+#Using good function names
+'''
+A good function name can go a long way for both user and maintainer understanding. 
+A good function name is descriptive and describes what a function does. 
+In this exercise, you'll choose a name for a function that will help aid in its readability when used.
+'''
+
+def hypotenuse_length(leg_a, leg_b):
+    """Find the length of a right triangle's hypotenuse
+
+    :param leg_a: length of one leg of triangle
+    :param leg_b: length of other leg of triangle
+    :return: length of hypotenuse
+    
+    >>> hypotenuse_length(3, 4)
+    5
+    """
+    return math.sqrt(leg_a**2 + leg_b**2)
+# Print the length of the hypotenuse with legs 6 & 8
+print(hypotenuse_length(6,8))
+
+#Using good variable names
+'''
+Just like functions, descriptive variable names can make your code much more readable. 
+In this exercise, you'll write some code using good variable naming practices.
+
+There's not always a clear best name for a variable. 
+The exercise has been written to try and make a clear best choice from the provided options.
+'''
+
+from statistics import mean
+# Sample measurements of pupil diameter in mm
+pupil_diameter = [3.3, 6.8, 7.0, 5.4, 2.7]
+# Average pupil diameter from sample
+mean_diameter = mean(pupil_diameter)
+print(mean_diameter)
