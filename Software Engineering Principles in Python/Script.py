@@ -656,3 +656,105 @@ pupil_diameter = [3.3, 6.8, 7.0, 5.4, 2.7]
 # Average pupil diameter from sample
 mean_diameter = mean(pupil_diameter)
 print(mean_diameter)
+
+#Refactoring for readability
+'''
+Refactoring longer functions into smaller units can help with both readability and modularity. 
+In this exercise, you will refactor a function into smaller units. 
+The function you will be refactoring is shown below. 
+Note, in the exercise, you won't be using docstrings for the sake of space; in a real application, 
+you should include documentation!
+
+def polygon_area(n_sides, side_len):
+    """Find the area of a regular polygon
+
+    :param n_sides: number of sides
+    :param side_len: length of polygon sides
+    :return: area of polygon
+
+    >>> round(polygon_area(4, 5))
+    25
+    """
+    perimeter = n_sides * side_len
+
+    apothem_denominator = 2 * math.tan(math.pi / n_sides)
+    apothem = side_len / apothem_denominator
+
+    return perimeter * apothem / 2
+'''
+
+def polygon_perimeter(n_sides, side_len):
+    return n_sides*side_len
+def polygon_apothem(n_sides, side_len):
+    denominator = 2 * math.tan(math.pi / n_sides)
+    return side_len / denominator
+def polygon_area(n_sides, side_len):
+    perimeter = polygon_perimeter
+    apothem = side_len/polygon_apothem(n_sides,side_len)
+    return polygon_perimeter(n_sides,side_len) * polygon_apothem(n_sides,side_len) / 2
+# Print the area of a hexagon with legs of size 10
+print(polygon_area(n_sides=6, side_len=10))
+
+#Using doctest
+'''
+We just learned about doctest, which, if you're writing full docstrings with examples, 
+is a simple way to minimally test your functions. In this exercise, 
+you'll get some hands-on practice testing and debugging with doctest.
+
+The following have all been pre-loaded in your environment: doctest, Counter, and text_analyzer.
+
+Note that your docstring submission must match the solution exactly. 
+If you find yourself getting it wrong several times, it may be a good idea to refresh the sample code and start over.
+'''
+
+def sum_counters(counters):
+    """Aggregate collections.Counter objects by summing counts
+
+    :param counters: list/tuple of counters to sum
+    :return: aggregated counters with counts summed
+
+    >>> d1 = text_analyzer.Document('1 2 fizz 4 buzz fizz 7 8')
+    >>> d2 = text_analyzer.Document('fizz buzz 11 fizz 13 14')
+    >>> sum_counters([d1.word_counts, d2.word_counts])
+    Counter({'fizz': 4, 'buzz': 2})
+    """
+    return sum(counters, Counter())
+doctest.testmod()
+
+#Using pytest
+'''
+doctest is a great tool, but it's not nearly as powerful as pytest. 
+In this exercise, you'll write tests for your SocialMedia class using the pytest framework.
+'''
+
+from collections import Counter
+from text_analyzer import SocialMedia
+# Create an instance of SocialMedia for testing
+test_post = 'learning #python & #rstats is awesome! thanks @datacamp!'
+sm_post = SocialMedia(test_post)
+# Test hashtag counts are created properly
+def test_social_media_hashtags():
+    expected_hashtag_counts = Counter({'#python': 1, '#rstats': 1})
+    assert sm_post.hashtag_counts == expected_hashtag_counts
+
+#Documenting classes for Sphinx
+'''
+sphinx is a great tool for rendering documentation as HTML. 
+In this exercise, you'll write a docstring for a class that can be taken advantage of by sphinx.
+Note that your docstring submission must match the solution exactly. 
+If you find yourself getting it wrong several times, it may be a good idea to refresh the sample code and start over.
+'''
+from text_analyzer import Document
+
+class SocialMedia(Document):
+    """Analyze text data from social media
+    
+    :param text: social media text to analyze
+
+    :ivar hashtag_counts: Counter object containing counts of hashtags used in text
+    :ivar mention_counts: Counter object containing counts of @mentions used in text
+    """
+    def __init__(self, text):
+        Document.__init__(self, text)
+        self.hashtag_counts = self._count_hashtags()
+        self.mention_counts = self._count_mentions()
