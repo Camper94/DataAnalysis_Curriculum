@@ -161,3 +161,39 @@ cut -d, -f 2 seasonal/winter.csv | grep -v Tooth | sort -r
 #cut -d , -f 2 seasonal/winter.csv | grep -v Tooth
 #Extend it with a sort command, 
 #and use uniq -c to display unique lines with a count of how often each occurs rather than using uniq and wc.
+cut -d, -f 2 seasonal/winter.csv | grep -v Tooth | sort | uniq -c
+
+#How can I save the output of a pipe?
+#The shell lets us redirect the output of a sequence of piped commands:
+#cut -d , -f 2 seasonal/*.csv | grep -v Tooth > teeth-only.txt
+#However, > must appear at the end of the pipeline: if we try to use it in the middle, like this:
+#cut -d , -f 2 seasonal/*.csv > teeth-only.txt | grep -v Tooth
+#then all of the output from cut is written to teeth-only.txt, 
+#so there is nothing left for grep and it waits forever for some input.
+#What happens if we put redirection at the front of a pipeline as in:
+#> result.txt head -n 3 seasonal/winter.csv
+
+#The command's output is redirected to the file as usual .
+
+#How can I stop a running program?
+#The commands and scripts that you have run so far have all executed quickly, 
+#but some tasks will take minutes, hours, or even days to complete. 
+#You may also mistakenly put redirection in the middle of a pipeline, causing it to hang up. 
+#If you decide that you don't want a program to keep running, you can type Ctrl + C to end it. 
+#This is often written ^C in Unix documentation; note that the 'c' can be lower-case.
+head
+^C
+
+#Wrapping up
+#To wrap up, you will build a pipeline to find out how many records are in the shortest of the seasonal data files.
+#Use wc with appropriate parameters to list the number of lines in all of the seasonal data files. 
+#(Use a wildcard for the filenames instead of typing them all in by hand.)
+#Use wc with appropriate parameters to list the number of lines in all of the seasonal data files. 
+#(Use a wildcard for the filenames instead of typing them all in by hand.)
+wc -l seasonal/*.csv
+
+#Add another command to the previous one using a pipe to remove the line containing the word "total".
+wc -l seasonal/*.csv | grep -v "total"
+
+#Add two more stages to the pipeline that use sort -n and head -n 1 to find the file containing the fewest lines.
+wc -l seasonal/*.csv | grep -v "total" | sort -n | head -n 1
