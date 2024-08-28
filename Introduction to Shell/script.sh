@@ -81,4 +81,83 @@ cut -d, -f 2 seasonal/summer.csv | grep -v Tooth | head -n 1
 #Count how many records in seasonal/spring.csv have dates in July 2017 (2017-07).
 #To do this, use grep with a partial date to select the lines and pipe this result into wc 
 #with an appropriate flag to count the lines.
+grep 2017-07 seasonal/spring.csv | wc -l
 
+
+#How can I specify many files at once?
+#Most shell commands will work on multiple files if you give them multiple filenames. 
+#For example, you can get the first column from all of the seasonal data files at once like this:
+
+#cut -d , -f 1 seasonal/winter.csv seasonal/spring.csv seasonal/summer.csv seasonal/autumn.csv
+#But typing the names of many files over and over is a bad idea: it wastes time, 
+#and sooner or later you will either leave a file out or repeat a file's name. 
+#To make your life better, the shell allows you to use wildcards to specify a list of files with a single expression. 
+#The most common wildcard is *, which means "match zero or more characters". 
+#Using it, we can shorten the cut command above to this:
+
+#cut -d , -f 1 seasonal/*
+#or:
+#cut -d , -f 1 seasonal/*.csv
+
+#Write a single command using head to get the first three lines from both seasonal/spring.csv and seasonal/summer.csv, 
+#a total of six lines of data, but not from the autumn or winter data files. 
+#Use a wildcard instead of spelling out the files' names in full.
+head -n 3 seasonal/s*.csv
+
+#What other wildcards can I use?
+#The shell has other wildcards as well, though they are less commonly used:
+
+#? matches a single character, so 201?.txt will match 2017.txt or 2018.txt, but not 2017-01.txt.
+#[...] matches any one of the characters inside the square brackets, so 201[78].txt matches 2017.txt or 2018.txt, 
+#but not 2016.txt.
+#{...} matches any of the comma-separated patterns inside the curly brackets, 
+#so {*.txt, *.csv} matches any file whose name ends with .txt or .csv, but not files whose names end with .pdf.
+#Which expression would match singh.pdf and johel.txt but not sandhu.pdf or sandhu.txt?
+{singh.pdf, j*.txt}
+
+#How can I sort lines of text?
+#As its name suggests, sort puts data in order. 
+#By default it does this in ascending alphabetical order, 
+#but the flags -n and -r can be used to sort numerically and reverse the order of its output, 
+#while -b tells it to ignore leading blanks and -f tells it to fold case (i.e., be case-insensitive). 
+#Pipelines often use grep to get rid of unwanted records and then sort to put the remaining records in order.
+
+#Remember the combination of cut and grep to select all the tooth names from column 2 of seasonal/summer.csv?
+#cut -d , -f 2 seasonal/summer.csv | grep -v Tooth
+#Starting from this recipe, sort the names of the teeth in seasonal/winter.csv (not summer.csv) 
+#in descending alphabetical order. To do this, extend the pipeline with a sort step.
+cut -d, -f 2 seasonal/winter.csv | grep -v Tooth | sort -r
+
+#How can I remove duplicate lines?
+#Another command that is often used with sort is uniq, whose job is to remove duplicated lines. 
+#More specifically, it removes adjacent duplicated lines. If a file contains:
+
+#2017-07-03
+#2017-07-03
+#2017-08-03
+#2017-08-03
+#then uniq will produce:
+
+#2017-07-03
+#2017-08-03
+#but if it contains:
+
+#2017-07-03
+#2017-08-03
+#2017-07-03
+#2017-08-03
+#then uniq will print all four lines. The reason is that uniq is built to work with very large files. 
+#In order to remove non-adjacent lines from a file, 
+#it would have to keep the whole file in memory (or at least, all the unique lines seen so far). 
+#By only removing adjacent duplicates, it only has to keep the most recent unique line in memory.
+
+#Write a pipeline to:
+#get the second column from seasonal/winter.csv,
+#remove the word "Tooth" from the output so that only tooth names are displayed,
+#sort the output so that all occurrences of a particular tooth name are adjacent; and
+#display each tooth name once along with a count of how often it occurs.
+#The start of your pipeline is the same as the previous exercise:
+
+#cut -d , -f 2 seasonal/winter.csv | grep -v Tooth
+#Extend it with a sort command, 
+#and use uniq -c to display unique lines with a count of how often each occurs rather than using uniq and wc.
