@@ -4,6 +4,11 @@
 #Date : August 27, 2024
 
 #Chapter III: Combing Tools
+#Description: The real power of the Unix shell lies not in the individual commands, 
+#but in how easily they can be combined to do new things. 
+#This chapter will show you how to use this power to select the data you want, 
+#and introduce commands for sorting values and removing duplicates.
+
 #How can I store a command's output in a file?
 #All of the tools you have seen so far let you name input files. 
 #Most don't have an option for naming an output file because they don't need one. 
@@ -197,3 +202,183 @@ wc -l seasonal/*.csv | grep -v "total"
 
 #Add two more stages to the pipeline that use sort -n and head -n 1 to find the file containing the fewest lines.
 wc -l seasonal/*.csv | grep -v "total" | sort -n | head -n 1
+
+#Chapter VI: Batch Processing
+#Description : Most shell commands will process many files at once. 
+#This chapter shows you how to make your own pipelines do that. 
+#Along the way, you will see how the shell uses variables to store information.
+
+#How does the shell store information?
+#Like other programs, the shell stores information in variables. 
+#Some of these, called environment variables, are available all the time. 
+#Environment variables' names are conventionally written in upper case, 
+#and a few of the more commonly-used ones are shown below.
+
+#Variable	Purpose	Value
+#HOME	User's home directory	/home/repl
+#PWD	Present working directory	Same as pwd command
+#SHELL	Which shell program is being used	/bin/bash
+#USER	User's ID	repl
+#To get a complete list (which is quite long), you can type set in the shell.
+
+#Use set and grep with a pipe to display the value of HISTFILESIZE, 
+#which determines how many old commands are stored in your command history. What is its value?
+set | grep HISTFILESIZE
+HISTFILESIZE=2000
+
+#How can I print a variable's value?
+#A simpler way to find a variable's value is to use a command called echo, which prints its arguments. Typing
+
+#echo hello DataCamp!
+#prints
+
+#hello DataCamp!
+#If you try to use it to print a variable's value like this:
+
+#echo USER
+#it will print the variable's name, USER.
+
+#To get the variable's value, you must put a dollar sign $ in front of it. Typing
+
+#echo $USER
+#prints
+
+#repl
+#This is true everywhere: to get the value of a variable called X, you must write $X. 
+#(This is so that the shell can tell whether you mean "a file named X" or "the value of a variable named X".)
+#The variable OSTYPE holds the name of the kind of operating system you are using. Display its value using echo.
+echo $OSTYPE
+
+#How else does the shell store information?
+#The other kind of variable is called a shell variable, which is like a local variable in a programming language.
+
+#To create a shell variable, you simply assign a value to a name:
+
+#training=seasonal/summer.csv
+#without any spaces before or after the = sign. Once you have done this, you can check the variable's value with:
+
+#echo $training
+#seasonal/summer.csv
+#Define a variable called testing with the value seasonal/winter.csv.
+head -n 1 $testing
+
+#How can I repeat a command many times?
+#Shell variables are also used in loops, which repeat commands many times. If we run this command:
+
+#for filetype in gif jpg png; do echo $filetype; done
+#it produces:
+
+#gif
+#jpg
+#png
+#Notice these things about the loop:
+
+#The structure is for …variable… in …list… ; do …body… ; done
+#The list of things the loop is to process (in our case, the words gif, jpg, and png).
+#The variable that keeps track of which thing the loop is currently processing (in our case, filetype).
+#The body of the loop that does the processing (in our case, echo $filetype).
+#Notice that the body uses $filetype to get the variable's value instead of just filetype, 
+#just like it does with any other shell variable. 
+#Also notice where the semi-colons go: the first one comes between the list and the keyword do, 
+#and the second comes between the body and the keyword done.
+for filetype in docx odt pdf; do echo $filetype; done
+
+#How can I repeat a command once for each file?
+#You can always type in the names of the files you want to process when writing the loop, 
+#but it's usually better to use wildcards. Try running this loop in the console:
+
+#for filename in seasonal/*.csv; do echo $filename; done
+#It prints:
+
+#seasonal/autumn.csv
+#seasonal/spring.csv
+#seasonal/summer.csv
+#seasonal/winter.csv
+#because the shell expands seasonal/*.csv to be a list of four filenames before it runs the loop.
+
+#Modify the wildcard expression to people/* so that the loop prints the names of the files 
+#in the people directory regardless of what suffix they do or don't have. 
+#Please use filename as the name of your loop variable.
+for filename in people/*; do echo $filename; done
+
+#How can I record the names of a set of files?
+#People often set a variable using a wildcard expression to record a list of filenames. 
+#For example, if you define datasets like this:
+
+#datasets=seasonal/*.csv
+#you can display the files' names later using:
+
+#for filename in $datasets; do echo $filename; done
+#This saves typing and makes errors less likely.
+
+#If you run these two commands in your home directory, how many lines of output will they print?
+
+#files=seasonal/*.csv
+#for f in $files; do echo $f; done
+#Four:the names of all four seasonal data files.
+
+#A variable's name versus its value
+#A common mistake is to forget to use $ before the name of a variable. 
+#When you do this, the shell uses the name you have typed rather than the value of that variable.
+
+#A more common mistake for experienced users is to mis-type the variable's name. 
+#For example, if you define datasets like this:
+
+#datasets=seasonal/*.csv
+#and then type:
+
+#echo $datsets
+#the shell doesn't print anything, because datsets (without the second "a") isn't defined.
+
+#If you were to run these two commands in your home directory, what output would be printed?
+
+#files=seasonal/*.csv
+#for f in files; do echo $f; done
+#(Read the first part of the loop carefully before answering.)
+#Answer : One line: the word "files"
+
+#How can I run many commands in a single loop?
+#Printing filenames is useful for debugging, but the real purpose of loops is to do things with multiple files. 
+#This loop prints the second line of each data file:
+
+#for file in seasonal/*.csv; do head -n 2 $file | tail -n 1; done
+#It has the same structure as the other loops you have already seen: 
+#all that's different is that its body is a pipeline of two commands instead of a single command.
+for file in seasonal/*.csv; do grep 2017-07 $file | tail -n 1;done
+
+#Why shouldn't I use spaces in filenames?
+#It's easy and sensible to give files multi-word names like July 2017.csv when you are using a graphical file explorer. 
+#However, this causes problems when you are working in the shell. 
+#For example, suppose you wanted to rename July 2017.csv to be 2017 July data.csv. You cannot type:
+
+#mv July 2017.csv 2017 July data.csv
+#because it looks to the shell as though you are trying to move four files called July, 2017.csv, 2017, 
+#and July (again) into a directory called data.csv. 
+#Instead, you have to quote the files' names so that the shell treats each one as a single parameter:
+
+#mv 'July 2017.csv' '2017 July data.csv'
+#If you have two files called current.csv and last year.csv (with a space in its name) and you type:
+
+#rm current.csv last year.csv
+#what will happen: 
+#The shell will print an error message because last and year.csv do not exist and The shell will delete current.csv. 
+
+#How can I do many things in a single loop?
+#The loops you have seen so far all have a single command or pipeline in their body, 
+#but a loop can contain any number of commands. 
+#To tell the shell where one ends and the next begins, you must separate them with semi-colons:
+
+#for f in seasonal/*.csv; do echo $f; head -n 2 $f | tail -n 1; done
+#seasonal/autumn.csv
+#2017-01-05,canine
+#seasonal/spring.csv
+#2017-01-25,wisdom
+#seasonal/summer.csv
+#2017-01-11,canine
+#seasonal/winter.csv
+#2017-01-03,bicuspid
+#Suppose you forget the semi-colon between the echo and head commands in the previous loop, 
+#so that you ask the shell to run:
+
+#for f in seasonal/*.csv; do echo $f head -n 2 $f | tail -n 1; done
+#What will the shell do? Print one line for each of the four files.
