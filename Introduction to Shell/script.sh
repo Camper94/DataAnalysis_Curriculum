@@ -487,5 +487,3 @@ bash teeth.sh > teeth.out
 #bash unique-lines.sh seasonal/summer.csv seasonal/autumn.csv
 #it processes two data files, and so on.
 bash count-records.sh seasonal/*.csv > num-records.out
-
-As a reminder, to save what you have written in Nano, type Ctrl + O to write the file out, then Enter to confirm the filename, then Ctrl + X to exit the editor.
