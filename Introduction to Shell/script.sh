@@ -382,3 +382,110 @@ for file in seasonal/*.csv; do grep 2017-07 $file | tail -n 1;done
 
 #for f in seasonal/*.csv; do echo $f head -n 2 $f | tail -n 1; done
 #What will the shell do? Print one line for each of the four files.
+
+#Chapter V: Creating new tools
+#Description : History lets you repeat things with just a few keystrokes, 
+#and pipes let you combine existing commands to create new ones. 
+#In this chapter, you will see how to go one step further and create new commands of your own.
+
+#How can I edit a file?
+#Unix has a bewildering variety of text editors. 
+#For this course, we will use a simple one called Nano. 
+#If you type nano filename, it will open filename for editing (or create it if it doesn't already exist). 
+#You can move around with the arrow keys, delete characters using backspace, 
+#and do other operations with control-key combinations:
+
+#Ctrl + K: delete a line.
+#Ctrl + U: un-delete a line.
+#Ctrl + O: save the file ('O' stands for 'output'). You will also need to press Enter to confirm the filename!
+#Ctrl + X: exit the editor.
+
+#Run nano names.txt to edit a new file in your home directory and enter the following four lines:
+
+#Lovelace
+#Hopper
+#Johnson
+#Wilson
+#To save what you have written, type Ctrl + O to write the file out, 
+#then Enter to confirm the filename, then Ctrl + X to exit the editor.
+nano names.txt CTRL+O "/home/repl/names.txt" CTRL+X
+
+#How can I record what I just did?
+#When you are doing a complex analysis, you will often want to keep a record of the commands you used. 
+#You can do this with the tools you have already seen:
+
+#Run history.
+#Pipe its output to tail -n 10 (or however many recent steps you want to save).
+#Redirect that to a file called something like figure-5.history.
+#This is better than writing things down in a lab notebook because it is guaranteed not to miss any steps. 
+#It also illustrates the central idea of the shell: 
+#simple tools that produce and consume lines of text can be combined in 
+#a wide variety of ways to solve a broad range of problems.
+
+#Copy the files seasonal/spring.csv and seasonal/summer.csv to your home directory.
+cp seasonal/s* ~
+
+#Use grep with the -h flag (to stop it from printing filenames) and -v Tooth (to select lines 
+#that don't match the header line) to select the data records from spring.csv and summer.csv 
+#in that order and redirect the output to temp.csv.
+grep -h -v Tooth spring.csv summer.csv > temp.csv
+
+#Pipe history into tail -n 3 and redirect the output to steps.txt to save the last three commands in a file. 
+#(You need to save three instead of just two because the history command itself will be in the list.)
+history | tail -n 3 > steps.txt
+
+
+#How can I save commands to re-run later?
+#You have been using the shell interactively so far. But since the commands you type in are just text, 
+#you can store them in files for the shell to run over and over again. 
+#To start exploring this powerful capability, put the following command in a file called headers.sh:
+
+#head -n 1 seasonal/*.csv
+#This command selects the first row from each of the CSV files in the seasonal directory. 
+#Once you have created this file, you can run it by typing:
+
+#Use nano dates.sh to create a file called dates.sh that contains this command:
+#cut -d , -f 1 seasonal/*.csv
+#to extract the first column from all of the CSV files in seasonal.
+nano dates.sh
+#Use bash to run the file dates.sh
+bash dates.sh
+
+#How can I re-use pipes?
+#A file full of shell commands is called a *shell script, or sometimes just a "script" for short. 
+#Scripts don't have to have names ending in .sh, 
+#but this lesson will use that convention to help you keep track of which files are scripts.
+
+#Scripts can also contain pipes. For example, if all-dates.sh contains this line:
+
+#cut -d , -f 1 seasonal/*.csv | grep -v Date | sort | uniq
+#then:
+
+#bash all-dates.sh > dates.out
+#will extract the unique dates from the seasonal data files and save them in dates.out.
+
+#A file teeth.sh in your home directory has been prepared for you, but contains some blanks. 
+#Use Nano to edit the file and replace the two ____ placeholders with seasonal/*.csv and -c so 
+#that this script prints a count of the number of times each tooth name appears in the CSV files in the seasonal directory.
+nano teeth.sh
+#Use bash to run teeth.sh and > to redirect its output to teeth.out.
+bash teeth.sh
+#Run cat teeth.out to inspect your results.
+bash teeth.sh > teeth.out
+
+#How can I pass filenames to scripts?
+#A script that processes specific files is useful as a record of what you did, 
+#but one that allows you to process any files you want is more useful. 
+#To support this, you can use the special expression $@ (dollar sign immediately followed by at-sign) 
+#to mean "all of the command-line parameters given to the script".
+
+#For example, if unique-lines.sh contains sort $@ | uniq, when you run:
+
+#bash unique-lines.sh seasonal/summer.csv
+#the shell replaces $@ with seasonal/summer.csv and processes one file. If you run this:
+
+#bash unique-lines.sh seasonal/summer.csv seasonal/autumn.csv
+#it processes two data files, and so on.
+bash count-records.sh seasonal/*.csv > num-records.out
+
+As a reminder, to save what you have written in Nano, type Ctrl + O to write the file out, then Enter to confirm the filename, then Ctrl + X to exit the editor.
