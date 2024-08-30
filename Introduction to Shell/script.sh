@@ -487,3 +487,104 @@ bash teeth.sh > teeth.out
 #bash unique-lines.sh seasonal/summer.csv seasonal/autumn.csv
 #it processes two data files, and so on.
 bash count-records.sh seasonal/*.csv > num-records.out
+
+#How can I process a single argument?
+#As well as $@, the shell lets you use $1, $2, and so on to refer to specific command-line parameters. 
+#You can use this to write commands that feel simpler or more natural than the shell's. For example, 
+#you can create a script called column.sh that selects a single column from a CSV file 
+#when the user provides the filename as the first parameter and the column as the second:
+
+#cut -d , -f $2 $1
+#and then run it using:
+
+#bash column.sh seasonal/autumn.csv 1
+#Notice how the script uses the two parameters in reverse order.
+
+#The script get-field.sh is supposed to take a filename, the number of the row to select, 
+#the number of the column to select, and print just that field from a CSV file. For example:
+
+#bash get-field.sh seasonal/summer.csv 4 2
+#should select the second field from line 4 of seasonal/summer.csv. Which of 
+#the following commands should be put in get-field.sh to do that?
+head -n $2 $1 | tail -n 1 | cut -d , -f $3
+
+#How can one shell script do many things?
+#Our shells scripts so far have had a single command or pipe, but a script can contain many lines of commands. 
+#For example, you can create one that tells you how many records are in the shortest and longest of your data files,
+#i.e., the range of your datasets' lengths.
+
+#Note that in Nano, "copy and paste" is achieved by navigating to the line you want to copy, 
+#pressing CTRL + K to cut the line, then CTRL + U twice to paste two copies of it.
+
+#As a reminder, to save what you have written in Nano, type Ctrl + O to write the file out, 
+#then Enter to confirm the filename, then Ctrl + X to exit the editor.
+
+#Use Nano to edit the script range.sh and replace the two ____ placeholders with $@ and -v so that 
+#it lists the names and number of lines in all of the files given on the command line 
+#without showing the total number of lines in all files. (Do not try to subtract the column header lines from the files.)
+nano range.sh
+wc -l $@ | grep -v total
+
+#Use Nano again to add sort -n and head -n 1 in that order to the pipeline in range.sh 
+#to display the name and line count of the shortest file given to it.
+wc -l $@ | grep -v total | sort -n | head -n 1
+
+#Again using Nano, add a second line to range.sh to print the name and record count of the longest file in the directory 
+#as well as the shortest. This line should be a duplicate of the one you have already written, 
+#but with sort -n -r rather than sort -n.
+wc -l $@ | grep -v total | sort -n -r | head -n 1
+
+#Run the script on the files in the seasonal directory using seasonal/*.csv
+#to match all of the files and redirect the output using > to a file called range.out in your home directory.
+bash range.sh seasonal/*.csv > range.out
+
+#How can I write loops in a shell script?
+#Shell scripts can also contain loops. You can write them using semi-colons, 
+#or split them across lines without semi-colons to make them more readable:
+
+# Print the first and last data records of each file.
+#for filename in $@
+#do
+#    head -n 2 $filename | tail -n 1
+#    tail -n 1 $filename
+#done
+#(You don't have to indent the commands inside the loop, but doing so makes things clearer.)
+
+#The first line of this script is a comment to tell readers what the script does. 
+#Comments start with the # character and run to the end of the line. Your future self will 
+#thank you for adding brief explanations like the one shown here to every script you write.
+
+#As a reminder, to save what you have written in Nano, type Ctrl + O to write the file out, 
+#then Enter to confirm the filename, then Ctrl + X to exit the editor.
+
+#Fill in the placeholders in the script date-range.sh with $filename (twice), 
+#head, and tail so that it prints the first and last date from one or more files.
+for filename in $@
+do
+  cut -d , -f 1 $filename | grep -v Date | sort | head -n 1
+  cut -d , -f 1 $filename | grep -v Date | sort | tail -n 1
+done
+
+#Run date-range.sh on all four of the seasonal data files using seasonal/*.csv to match their names.
+bash date-range.sh seasonal/*.csv
+
+#Run date-range.sh on all four of the seasonal data files using seasonal/*.csv to match their names, 
+#and pipe its output to sort to see that your scripts can be used just like Unix's built-in commands.
+bash date-range.sh seasonal/. | sort
+
+#What happens when I don't provide filenames?
+#A common mistake in shell scripts (and interactive commands) is to put filenames in the wrong place. If you type:
+
+#tail -n 3
+#then since tail hasn't been given any filenames, it waits to read input from your keyboard. This means that if you type:
+
+#head -n 5 | tail -n 3 somefile.txt
+#then tail goes ahead and prints the last three lines of somefile.txt, 
+#but head waits forever for keyboard input, since it wasn't given a filename and there isn't 
+#anything ahead of it in the pipeline.
+
+#Suppose you do accidentally type:
+
+#head -n 5 | tail -n 3 somefile.txt
+#What should you do next?
+#Use Ctrl + C to stop the running head program.
