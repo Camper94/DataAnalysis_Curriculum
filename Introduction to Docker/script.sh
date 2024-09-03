@@ -105,6 +105,117 @@ docker image rm ubuntu
 #To be sure you can clean up your images, remove all stopped containers.
 docker image prune -a
 
+#Chapter II : Once you are able to manage images and containers, 
+#it's time to know how to share images with colleagues or your entire company and to understand 
+#how to create your own. Now, you'll build your own images using Dockerfiles. 
+#Dockerfiles are text files that include everything needed for Docker to build an image. 
+#You'll learn how to create images and will get an introduction to all the essential Dockerfile instructions 
+#like FROM, RUN, COPY, and more. 
+#By the end of this chapter, 
+#you'll have insight into how Docker makes images and be able to create optimized Docker images from scratch.
+
+#Sharing your work using Docker registry
+#Your company is developing a new spam filter method. 
+#You think you've found a good method and would like to share your results with your colleague 
+#in a way that allows them to verify your results. 
+#You've decided that using a Docker image with all your code and datasets is the right approach. 
+#You've already created this image on your local machine and called it spam:v1. 
+#The next step is to push this image to your company's registry docker.mycompany.com 
+#so that your colleagues can build upon your work.
+
+#Using the terminal, enter the command to tag the spam:v1 container so it can be pushed to docker.mycompany.com.
+docker tag spam:v1 docker.mycompany.com/spam:v1
+#Using the terminal, enter the command to push the docker.mycompany.com/spam:v1 image to the docker.mycompany.com registry.
+docker image push docker.mycompany.com/spam:v1
+
+#Saving an image to a file 
+#After you pushed your image to the company's registry, 
+#you got a lot of feedback from your colleagues. 
+#You addressed the most important feedback and would like to share your new Docker image, spam:v2, 
+#with just a few colleagues before you share it with the entire company again. 
+#Save your new Docker image to a file called spam_updated.tar so you can email it to your colleagues Alice and Bob.
+#Using the terminal, enter the command to save spam:v2 to a file called spam_updated.tar.
+docker save -o spam_updated.tar spam:v2
+
+#Receiving Docker Images
+#Your company is still working on that new spam filter! 
+#Your colleague Bob made possible improvements to your work and sent you a tar file. 
+#Another colleague, Alice, has pushed her version to the company's dockerhub, docker.mycompany.com. 
+#It's now up to you to run both containers and find out which runs fastest.
+#Using the terminal, enter the command to pull the container your colleague Alice made, spam_alice:v3, 
+#from the company's Docker Hub registry, docker.mycompany.com.
+#Using the terminal, enter the command to pull the container your colleague Alice made, spam_alice:v3, 
+#from the company's Docker Hub registry, docker.mycompany.com.
+docker pull docker.mycompany.com/spam_alice:v3
+#Run the container you just pulled, docker.mycompany.com/spam_alice:v3, to see how good its spam detection algorithm is.
+docker run docker.mycompany.com/spam_alice:v3
+#Using the terminal, enter the command to open the tar file your colleague Bob sent you, spam_bob.tar.
+docker load -i spam_bob.tar
+#Just like you did for Alice's container, run Bob's container, spam_bob:v3, to see how good its spam detection algorithm is.
+docker run spam_bob:v3
+
+#Building your first image
+#Let's build your first image! We've created a Dockerfile for you, 
+#and you can see it in your current working directory using the ls command. 
+#You can look at its content using cat Dockerfile or using nano.
+#Using the terminal, enter the command to build an image from the Dockerfile in your current working directory.
+docker build .
+
+#Well done! While it's possible to build an image without naming it, we usually want to give our image a name. 
+#Using the terminal, enter the command to build an image called my_first_image from the Dockerfile in your current 
+#working directory.
+docker build my_first_image .
+
+#Working in the command-line
+#A Dockerfile is just a textfile and creating or editing it can be done using any text editor. 
+#However since the default way to work with Docker is through the Command Line Interface, 
+#it's convenient to also edit Dockerfiles using the command line. 
+#Let's refresh our memory on how to navigate the file system and create or edit a Dockerfile with the command line.
+
+#Create a file called Dockerfile in the current working directory.
+#Use touch Dockerfile; the touch command will create an empty file for you.
+#Or use nano Dockerfile, which will create an empty file but also open the nano text editor, 
+#which you then have to save using CTRL+s after which you can exit with CTRL+x.
+touch Dockerfile
+
+#Now that you've created a new file let's add a line of text to it.
+#Open the file using nano Dockerfile.
+#add FROM ubuntu to the start of the file.
+#Use CTRL+s to save your changes.
+#Followed by CTRL+x to exit nano.
+nano Dockerfile
+CTRL+S
+CTRL+X
+
+#Using nano to edit a file is often the most intuitive way; 
+#however, you can also use echo combined with a double pipe (>>) to append to files without opening them. 
+#Let's use echo to append RUN apt-get update to our Dockerfile.
+#Type the first part of the command, echo "RUN apt-get update" which will print the text between the quotes, 
+#don't press enter yet.
+#Then add the double pipe >>, which will redirect the output.
+#Followed by Dockerfile to make the output of echo append to the Dockerfile.
+#Now execute the command by pressing the enter key.
+echo "RUN apt-get update" >> Dockerfile
+
+#Well done! You successfully created and made changes to a file. 
+#Often while working in the shell, you want to quickly check the contents of a file without making changes to it. 
+#This is easily done using the cat command.
+#Check the contents of the Dockerfile using the cat command, cat expects a filename as its first and only argument.
+cat Dockerfile
+
+#Editing a Dockerfile
+#Let's get familiar with the RUN instruction. 
+#We've created a Dockerfile for you. 
+#You can look at its content using cat Dockerfile or using nano. 
+#Like before, the Dockerfile already has a FROM instruction, but you'll be adding a RUN command this time.
+#Add the correct instruction to the end of the Dockerfile 
+#so that the mkdir my_app shell command is run when building the Dockerfile.
+nano Dockerfile
+RUN mkdir my_app
+
+#Using the terminal, run the command to build an image called my_app from the Dockerfile in your current working directory.
+docker build -t my_app .
+
 #Creating your own Dockerfile
 #While it's possible to download images for many use cases, an image might not always meet your exact needs. 
 #In that case, you can create a new image based on an existing one that closely matches your requirements. 
