@@ -321,3 +321,63 @@ docker build -t pipeline_debug
 
 #Let's test the image we just made. Using the terminal, enter the command to run the pipeline_debug image.
 docker run pipeline_debug
+
+#Docker caching
+#Now that you understand Docker image layers and when they are cached, which of the following statements is correct?
+#All of the above
+#Docker builds Dockerfiles into images; 
+#an image is composed of layers that correspond to specific Dockerfile instructions. 
+#A layer can be re-used for Dockerfiles with identical instructions.
+#When we build an image from a Dockerfile, every Dockerfile instruction is run, 
+#and the changes it makes to the file system are saved. 
+#The bundle of these changes to the file system is called a layer.
+#Image layer caching can be complex, 
+#but it allows us to understand how to greatly increase the speed with which we can iterate on,
+#i.e., improve or fix bugs in our images.
+
+#Ordering Dockerfile instructions
+#When writing Dockerfiles, the order of your Dockerfile instructions determines 
+#how long the build will take after updating any of the commands. 
+#Do you understand how to make the most efficient Dockerfiles?
+#FROM docker.io/library/ubuntu
+#RUN apt-get update
+#RUN apt-get install -y python3
+#COPY /app/requirements.txt/app/requirements.txt
+#COPY /app/pipeline.py/app/pipeline.py
+
+#WORKDIR and USER
+#Most Dockerfile instructions affect the file system. 
+#However, the WORKDIR and USER change the behavior of subsequent Dockerfile instructions. 
+#Let's see if you have a grasp on how these new instructions change the behavior of other instructions.
+#`WORKDIR` allows us to change the path in which the command of the `CMD` instruction is run.
+#After using `USER` in our Dockerfile, no instructions after 
+#`USER` can use any other user than the one we set with `USER`, until the user is changed again.
+#`USER` allows us to change the user with which the command of the `CMD` instruction is run.
+
+#Setting the user
+#You've finished the python code for the pipeline you were building and have gotten all 
+#the feedback you need from colleagues. 
+#To make your pipeline Docker image more foolproof, 
+#you want to set the user to repl before the project files are copied into the image. 
+#We've already added the RUN instruction to create a repl user for you.
+#Using the terminal, open the Dockerfile in your current working directory and edit the third line to set the user to repl.
+nano Dockerfile
+FROM ubuntu:22.04
+RUN useradd -m repl
+USER repl
+RUN mkdir/home/repl/projects/pipeline_final
+COPY /home/repl/project /home/repl/projects/pipeline_final
+
+#Setting the working directory
+#Putting the finishing touches to your pipeline Docker image, 
+#you want to make it clear that all pipeline project files in your 
+#images will be in the repl users' home directory by setting the working directory to /home/repl.
+#Using the terminal, open the Dockerfile in your current working directory and edit the 
+#fourth line to make all next instructions run in /home/repl.
+nano Dockerfile
+FROM ubuntu:22.04
+RUN useradd -m repl
+USER repl
+WORKDIR /home/repl/Dockerfile
+RUN mkdir prjects/pipeline_final
+COPY /home/repl/project projects/pipeline_final
