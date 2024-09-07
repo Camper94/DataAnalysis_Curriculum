@@ -381,3 +381,88 @@ USER repl
 WORKDIR /home/repl/Dockerfile
 RUN mkdir prjects/pipeline_final
 COPY /home/repl/project projects/pipeline_final
+
+#Understanding ARG and ENV
+#Let's make sure you understand the difference between the ENV and ARG Dockerfile instructions 
+#before we start using them in our Dockerfiles. Select all the correct statements below.
+#Variables set using ENV can be used in containers starting from your image, 
+#making it a good way to set configuration using a runtime.
+#It is possible to override variables set with ARG during the build, allowing us to configure images at build-time.
+#Every user starting a container from our image can select a different value for any ENV variables we set in our image.
+
+#Overriding ARG in a build
+#The ARG Dockerfile instruction allows us to set a variable in a Dockerfile 
+#and then optionally override it when building an image. 
+#We've added a Dockerfile to your current working directory with the following instructions:
+
+#FROM ubuntu
+#ARG WELCOME_TEXT=Hello!
+#RUN echo $WELCOME_TEXT
+#CMD echo $WELCOME_TEXT
+#The Dockerfile adds an ARG named WELCOME_TEXT, which is then printed during the build. 
+#The same text is printed when a container is started from the image.
+#Using the terminal, enter the command to build the Dockerfile and set the WELCOME_TEXT variable to Welcome!.
+docker build --build-arg WELCOME_TEXT=Welcome! .
+
+#Changing behavior when starting a container
+#Let's see how the ENV Dockerfile instruction works in practice. 
+#We've added a Dockerfile to your current working directory with the following instructions:
+
+#FROM ubuntu:22.04
+#ENV NAME=Tim
+#CMD echo "Hello, my name is $NAME"
+
+#The Dockerfile will print a personalized message, 
+#Hello, my name is Tim, on startup. 
+#Let's see how we can change this personalized message even after building an image from the Dockerfile.
+#Before we can start a container, we need to build the image from the Dockerfile. 
+#Build the Dockerfile in your local working directory giving it the name hello_image.
+docker build -t hello_image .
+#Now that we've built the image, we can start a container from it. 
+#Start a container from the hello_image image you just made, 
+#but use a flag on the command to set the NAME ENV variable to your name.
+docker run --env NAME=sofiane hello_image .
+
+#Security best practices
+#We went over several best practices for using and creating Docker images more securely. 
+#Applying these best practices from the start when creating images and working with 
+#Docker in general is the best way to make sure your work is secure. 
+#Let's see if you were able to internalize everything.
+#Possible Answers
+#Using a container is a good way to run an executable or open an archive from an untrusted source 
+#because you greatly decrease the chance of a malicious actor accessing your computer.
+#There is no safer application than one we haven't installed.
+#When creating an image ourselves, 
+#we can increase the security by changing the Linux user to something other than the root user.
+
+#Keeping packages up-to-date
+#Keeping Docker images up-to-date makes them more secure because applications 
+#might have released security updates since the image was released. 
+#This means even when using an image from a trusted source, 
+#we should update all the software on the image before using it in a production environment.
+
+#Exactly how you can update all software on an image depends on the image and its operating system. 
+#Let's learn how to update all packages on Ubuntu using the apt-get package.
+
+#First, start a container from the ubuntu image while setting 
+#the correct flag to get an interactive session in the container.
+#In the Ubuntu container, run apt-get update to make the apt-get package manager check 
+#if any updates are available for any packages.
+#Run apt-get upgrade to upgrade all installed packages.
+#Before confirming the upgrade, you'll be able to see the various reasons the package will be changed. 
+#What are the reasons?
+
+#upgraded,newly installed,to remove and not upgraded.
+
+#Be safe, don't use root
+#Not giving access to the root user in your images makes images more foolproof, 
+#as users only have access to what's relevant to the use case you intended for the image. 
+#Additionally, it is one of the best options to increase their security. 
+#We've built an image for you from the following Dockerfile, which tries to install python3 as soon as you start it.
+
+#FROM ubuntu
+#RUN useradd -m repl
+#USER repl
+#CMD apt-get install python3
+#Let's see what happens if we try to install python3 at startup as the repl user.
+docker run repl_try_install
